@@ -33,6 +33,17 @@ static NSString *const RNCallKitDidPerformSetMutedCallAction = @"RNCallKitDidPer
     NSUUID *_lastUUID;
 }
 
++ (instancetype)sharedInstance
+{
+    static RNCallKit *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[RNCallKit alloc] init];
+        // Do any other initialisation stuff here
+    });
+    return sharedInstance;
+}
+
 // should initialise in AppDelegate.m
 RCT_EXPORT_MODULE()
 
@@ -72,35 +83,11 @@ RCT_EXPORT_MODULE()
              ];
 }
 
-RCT_EXPORT_METHOD(setup:(NSDictionary *)options)
-{
-#ifdef DEBUG
-    NSLog(@"[RNCallKit][setup] options = %@", options);
-#endif
-    _version = [[[NSProcessInfo alloc] init] operatingSystemVersion];
-    self.callKitCallController = [[CXCallController alloc] init];
-    _settings = [[NSMutableDictionary alloc] initWithDictionary:options];
-    self.callKitProvider = [[CXProvider alloc] initWithConfiguration:[self getProviderConfiguration]];
-    [self.callKitProvider setDelegate:self queue:nil];
-}
-
-RCT_REMAP_METHOD(checkIfBusy,
-                 checkIfBusyWithResolver:(RCTPromiseResolveBlock)resolve
-                 rejecter:(RCTPromiseRejectBlock)reject)
-{
-#ifdef DEBUG
-    NSLog(@"[RNCallKit][checkIfBusy]");
-#endif
-    resolve(@(self.callKitCallController.callObserver.calls.count > 0));
-}
-
-#pragma mark - CXCallController call actions
-
 // Display the incoming call to the user
-RCT_EXPORT_METHOD(displayIncomingCall:(NSString *)uuidString
-                               handle:(NSString *)handle
-                           handleType:(NSString *)handleType
-                             hasVideo:(BOOL)hasVideo
+RCT_EXPORT_METHOD(reportNewIncomingCall:(NSString *)uuidString
+                  handle:(NSString *)handle
+                  handleType:(NSString *)handleType
+                  hasVideo:(BOOL)hasVideo
                   localizedCallerName:(NSString * _Nullable)localizedCallerName)
 {
 #ifdef DEBUG
@@ -128,6 +115,41 @@ RCT_EXPORT_METHOD(displayIncomingCall:(NSString *)uuidString
             }
         }
     }];
+}
+
+
+RCT_EXPORT_METHOD(setup:(NSDictionary *)options)
+{
+#ifdef DEBUG
+    NSLog(@"[RNCallKit][setup] options = %@", options);
+#endif
+    _version = [[[NSProcessInfo alloc] init] operatingSystemVersion];
+    self.callKitCallController = [[CXCallController alloc] init];
+    _settings = [[NSMutableDictionary alloc] initWithDictionary:options];
+    self.callKitProvider = [[CXProvider alloc] initWithConfiguration:[self getProviderConfiguration]];
+    [self.callKitProvider setDelegate:self queue:nil];
+}
+
+RCT_REMAP_METHOD(checkIfBusy,
+                 checkIfBusyWithResolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+#ifdef DEBUG
+    NSLog(@"[RNCallKit][checkIfBusy]");
+#endif
+    resolve(@(self.callKitCallController.callObserver.calls.count > 0));
+}
+
+#pragma mark - CXCallController call actions
+
+// Display the incoming call to the user
+RCT_EXPORT_METHOD(displayIncomingCall:(NSString *)uuidString
+                  handle:(NSString *)handle
+                  handleType:(NSString *)handleType
+                  hasVideo:(BOOL)hasVideo
+                  localizedCallerName:(NSString * _Nullable)localizedCallerName)
+{
+    [self reportNewIncomingCall: uuidString handle:handle handleType:handleType hasVideo:hasVideo localizedCallerName:localizedCallerName];
 }
 
 RCT_EXPORT_METHOD(startCall:(NSString *)uuidString
