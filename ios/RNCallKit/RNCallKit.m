@@ -84,12 +84,11 @@ RCT_EXPORT_MODULE()
 }
 
 // Display the incoming call to the user
-RCT_EXPORT_METHOD(reportNewIncomingCall:(NSString *)uuidString
-                  handle:(NSString *)handle
+-(void)reportNewIncomingCall:(NSString *)uuidString
+                      handle:(NSString *)handle
                   handleType:(NSString *)handleType
-                  hasVideo:(BOOL)hasVideo
-                  localizedCallerName:(NSString * _Nullable)localizedCallerName)
-{
+                    hasVideo:(BOOL)hasVideo
+         localizedCallerName:(NSString * _Nullable)localizedCallerName {
 #ifdef DEBUG
     NSLog(@"[RNCallKit][displayIncomingCall] uuidString = %@", uuidString);
 #endif

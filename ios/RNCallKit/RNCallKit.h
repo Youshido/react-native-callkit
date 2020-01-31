@@ -29,7 +29,7 @@ continueUserActivity:(NSUserActivity *)userActivity
 
 + (instancetype)sharedInstance;
 
-+ (void)reportNewIncomingCall:(NSString *)uuidString
+- (void)reportNewIncomingCall:(NSString *)uuidString
                        handle:(NSString *)handle
                    handleType:(NSString *)handleType
                      hasVideo:(BOOL)hasVideo
